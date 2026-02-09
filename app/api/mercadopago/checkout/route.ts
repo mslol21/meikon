@@ -37,6 +37,7 @@ export async function POST(req: Request) {
       await prisma.subscription.create({
         data: {
           userId: session.user.id,
+          stripeCustomerId: `temp_${session.user.id}`,
           status: "active",
           plan: "free",
         },
@@ -48,6 +49,10 @@ export async function POST(req: Request) {
     const startDate = new Date()
     startDate.setDate(startDate.getDate() + 14)
     startDate.setSeconds(0, 0) // Limpar milissegundos
+
+    // Validar URL de retorno (obrigatório ser absoluta para o MercadoPago)
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://meikon.vercel.app"
+    const back_url = `${baseUrl}/dashboard?success=true`
 
     try {
       const result = await preapproval.create({
@@ -61,7 +66,7 @@ export async function POST(req: Request) {
             start_date: startDate.toISOString().split('.')[0] + 'Z', // Formato simplificado ISO
           },
           payer_email: session.user.email,
-          back_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true`,
+          back_url: back_url,
           external_reference: session.user.id,
           status: "pending",
         }
