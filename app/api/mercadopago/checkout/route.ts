@@ -44,9 +44,9 @@ export async function POST(req: Request) {
       })
     }
 
-    // Calcular data de início (COMEÇO IMEDIATO para ativação da conta)
+    // Calcular data de início (Voltando para 14 dias de teste)
     const startDate = new Date()
-    startDate.setSeconds(startDate.getSeconds() + 30) // 30 segundos no futuro para evitar erro de atraso
+    startDate.setDate(startDate.getDate() + 14)
     startDate.setMilliseconds(0) 
 
     // Validar URL de retorno (obrigatório ser absoluta para o MercadoPago)
