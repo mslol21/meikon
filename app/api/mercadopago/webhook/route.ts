@@ -20,6 +20,8 @@ export async function POST(req: Request) {
        return NextResponse.json({ ok: true }) // Return 200 to avoid retries if not relevant
     }
 
+    console.log(`MercadoPago Webhook Received: Topic=${topic}, ID=${id}`)
+
     if (topic === "preapproval") {
       await handlePreapproval(id)
     }
@@ -37,6 +39,7 @@ export async function POST(req: Request) {
 async function handlePreapproval(id: string) {
   try {
     const subscription = await preapproval.get({ id })
+    console.log("MP Subscription Data:", JSON.stringify(subscription, null, 2))
     
     // Check status
     // status: authorized, paused, cancelled
@@ -44,7 +47,8 @@ async function handlePreapproval(id: string) {
     const userId = subscription.external_reference
     
     if (!userId) {
-        console.error("No user ID found in subscription:", id)
+        console.error("No user ID found in subscription external_reference:", id)
+        // Tentativa de backup via metadata ou payer_email se necessário, mas o external_reference é o ideal
         return
     }
 
@@ -53,15 +57,13 @@ async function handlePreapproval(id: string) {
     // MP: pending, authorized, paused, cancelled, rejected
     
     let dbStatus = "active"
-    if (status === "pending") dbStatus = "trialing" // If future start date
+    if (status === "pending") dbStatus = "trialing"
     if (status === "authorized") dbStatus = "active"
     if (status === "paused") dbStatus = "past_due"
     if (status === "cancelled") dbStatus = "canceled"
     if (status === "rejected") dbStatus = "canceled"
 
-    // Verify if it's a trial
-    // If startDate is in future, maybe 'trialing'
-    // But 'authorized' usually means it's good to go.
+    console.log(`Updating DB for user ${userId} to status ${dbStatus}`)
     
     await prisma.subscription.upsert({
       where: { userId },
@@ -69,6 +71,7 @@ async function handlePreapproval(id: string) {
         userId,
         mercadoPagoSubscriptionId: id,
         mercadoPagoCustomerId: subscription.payer_id?.toString(),
+        mercadoPagoPlanId: subscription.preapproval_plan_id,
         plan: "pro",
         status: dbStatus,
         mercadoPagoCurrentPeriodEnd: subscription.next_payment_date ? new Date(subscription.next_payment_date) : undefined
@@ -76,11 +79,14 @@ async function handlePreapproval(id: string) {
       update: {
         mercadoPagoSubscriptionId: id,
         mercadoPagoCustomerId: subscription.payer_id?.toString(),
+        mercadoPagoPlanId: subscription.preapproval_plan_id,
         plan: "pro",
         status: dbStatus,
         mercadoPagoCurrentPeriodEnd: subscription.next_payment_date ? new Date(subscription.next_payment_date) : undefined
       }
     })
+
+    console.log(`Successfully updated subscription for user ${userId}`)
 
   } catch (error) {
     console.error("Error handling preapproval:", error)
