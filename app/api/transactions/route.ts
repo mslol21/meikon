@@ -75,11 +75,11 @@ export async function POST(req: Request) {
         where: { userId: session.user.id },
       })
 
-      if (transactionCount >= 20) {
+      if (transactionCount >= 50) {
         return NextResponse.json(
           {
             error:
-              "Limite de 20 transações atingido. Faça upgrade para o plano PRO.",
+              "Limite de 50 transações atingido. Faça upgrade para o plano PRO.",
           },
           { status: 403 }
         )

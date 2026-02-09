@@ -141,7 +141,7 @@ export function InvoicingForm({ contacts }: InvoicingFormProps) {
                 Dica Fiscal
               </div>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Ao abrir o Portal Nacional, selecione a opção <strong>"Emissão Simplificada"</strong>. 
+                Ao abrir o Portal Nacional, selecione a opção <strong>&quot;Emissão Simplificada&quot;</strong>. 
                 Utilize o código de serviço correspondente ao seu CNAE principal para garantir a tributação correta.
               </p>
             </div>

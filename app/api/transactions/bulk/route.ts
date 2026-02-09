@@ -37,10 +37,10 @@ export async function POST(req: Request) {
       })
 
       const newTotal = transactionCount + data.length
-      if (newTotal > 20) {
+      if (newTotal > 50) {
         return NextResponse.json(
           {
-            error: `Limite ultrapassado. Você já possui ${transactionCount} transações e o plano Free permite apenas 20 no total.`,
+            error: `Limite ultrapassado. Você já possui ${transactionCount} transações e o plano Free permite apenas 50 no total.`,
           },
           { status: 403 }
         )

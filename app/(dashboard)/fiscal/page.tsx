@@ -17,6 +17,8 @@ import {
 import { formatCurrency } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
+import { TaxSimulator } from "@/components/dashboard/tax-simulator"
+
 async function getFiscalData(userId: string) {
   const currentYear = new Date().getFullYear()
   
@@ -198,6 +200,10 @@ export default async function FiscalPage() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      <div className="grid gap-6">
+        <TaxSimulator />
       </div>
     </div>
   )
