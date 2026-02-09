@@ -38,24 +38,18 @@ export async function POST(req: Request) {
 
 async function handlePreapproval(id: string) {
   try {
-    const subscription = await preapproval.get({ id })
+    const subscription = (await preapproval.get({ id })) as any
     console.log("MP Subscription Data:", JSON.stringify(subscription, null, 2))
     
     // Check status
-    // status: authorized, paused, cancelled
     const status = subscription.status
     const userId = subscription.external_reference
     
     if (!userId) {
         console.error("No user ID found in subscription external_reference:", id)
-        // Tentativa de backup via metadata ou payer_email se necessário, mas o external_reference é o ideal
         return
     }
 
-    // Map status to our DB status
-    // Our DB: "active" | "canceled" | "trialing" | "past_due"
-    // MP: pending, authorized, paused, cancelled, rejected
-    
     let dbStatus = "active"
     if (status === "pending") dbStatus = "trialing"
     if (status === "authorized") dbStatus = "active"
