@@ -139,16 +139,23 @@ model Category {
   @@unique([userId, name, type])
 }
 
-// Assinaturas (Stripe)
+// Assinaturas (Stripe & MercadoPago)
 model Subscription {
   id        String   @id @default(cuid())
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  stripeCustomerId       String   @unique
+  // Stripe
+  stripeCustomerId       String?   @unique
   stripeSubscriptionId   String?  @unique
   stripePriceId          String?
   stripeCurrentPeriodEnd DateTime?
+
+  // MercadoPago
+  mercadoPagoCustomerId       String?   @unique
+  mercadoPagoSubscriptionId   String?  @unique
+  mercadoPagoPlanId          String?
+  mercadoPagoCurrentPeriodEnd DateTime?
   
   status    String   // "active" | "canceled" | "trialing" | "past_due"
   plan      String   @default("free") // "free" | "pro"

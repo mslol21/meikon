@@ -18,7 +18,7 @@ export function UpgradeButton({ isPro, variant = "default" }: UpgradeButtonProps
     setIsLoading(true)
 
     try {
-      const response = await fetch("/api/stripe/checkout", {
+      const response = await fetch("/api/mercadopago/checkout", {
         method: "POST",
       })
 

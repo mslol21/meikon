@@ -23,6 +23,13 @@ export async function POST(req: Request) {
       )
     }
 
+    if (subscription.mercadoPagoSubscriptionId) {
+      return NextResponse.json(
+        { error: "Você já possui uma assinatura ativa via MercadoPago." },
+        { status: 400 }
+      )
+    }
+
     // If user already has a Stripe subscription, redirect to portal
     if (subscription.stripeSubscriptionId) {
       const portalSession = await stripe.billingPortal.sessions.create({
