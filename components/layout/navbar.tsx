@@ -8,9 +8,9 @@ export function Navbar() {
     <header className="flex h-16 items-center justify-between border-b bg-card px-6">
       <div className="flex items-center gap-4">
         <MobileSidebar />
-        <div>
-          <h2 className="text-lg font-semibold">Bem-vindo ao MEIKon</h2>
-          <p className="text-sm text-muted-foreground">
+        <div className="min-w-0">
+          <h2 className="text-sm md:text-lg font-semibold truncate">Bem-vindo ao MEIKon</h2>
+          <p className="hidden md:block text-sm text-muted-foreground">
             Gerencie suas finanças de forma simples
           </p>
         </div>

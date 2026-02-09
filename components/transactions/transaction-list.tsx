@@ -147,16 +147,16 @@ export function TransactionList({
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="grid gap-4 md:grid-cols-5">
-        <div>
-          <Label>Tipo</Label>
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="space-y-2">
+          <Label className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">Tipo</Label>
           <Select
             value={filters.type}
             onValueChange={(value) =>
               setFilters({ ...filters, type: value })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-card">
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
             <SelectContent>
@@ -167,15 +167,15 @@ export function TransactionList({
           </Select>
         </div>
 
-        <div>
-          <Label>Status</Label>
+        <div className="space-y-2">
+          <Label className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">Status</Label>
           <Select
             value={filters.isPaid}
             onValueChange={(value) =>
               setFilters({ ...filters, isPaid: value })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-card">
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
             <SelectContent>
@@ -186,10 +186,11 @@ export function TransactionList({
           </Select>
         </div>
 
-        <div>
-          <Label>Data Inicial</Label>
+        <div className="space-y-2">
+          <Label className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">Início</Label>
           <Input
             type="date"
+            className="bg-card"
             value={filters.startDate}
             onChange={(e) =>
               setFilters({ ...filters, startDate: e.target.value })
@@ -197,10 +198,11 @@ export function TransactionList({
           />
         </div>
 
-        <div>
-          <Label>Data Final</Label>
+        <div className="space-y-2">
+          <Label className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">Fim</Label>
           <Input
             type="date"
+            className="bg-card"
             value={filters.endDate}
             onChange={(e) =>
               setFilters({ ...filters, endDate: e.target.value })
@@ -252,7 +254,8 @@ export function TransactionList({
             }}
           >
             <Download className="h-4 w-4" />
-            CSV
+            <span className="hidden sm:inline">Exportar</span>
+            <span className="sm:hidden">CSV</span>
           </Button>
         </div>
       </div>
@@ -268,11 +271,11 @@ export function TransactionList({
             {paginatedTransactions.map((transaction) => (
               <div
                 key={transaction.id}
-                className="flex items-center justify-between p-4 hover:bg-muted/50"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-muted/50 gap-4"
               >
                 <div className="flex items-center gap-4">
                   <div
-                    className={`rounded-full p-2 ${
+                    className={`rounded-full p-2 h-fit ${
                       transaction.type === "income"
                         ? "bg-success/10"
                         : "bg-destructive/10"
@@ -284,15 +287,15 @@ export function TransactionList({
                       <ArrowDownRight className="h-5 w-5 text-destructive" />
                     )}
                   </div>
-                  <div>
-                    <p className="font-medium">{transaction.description}</p>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>{transaction.category}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium truncate">{transaction.description}</p>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                      <span className="font-medium text-foreground/70">{transaction.category}</span>
                       <span>•</span>
                       <span>{formatDate(transaction.date)}</span>
-                      <span>•</span>
                       <Badge
                         variant={transaction.isPaid ? "success" : "secondary"}
+                        className="text-[10px] py-0 h-4"
                       >
                         {transaction.isPaid ? "Pago" : "Pendente"}
                       </Badge>
@@ -300,9 +303,9 @@ export function TransactionList({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center justify-between sm:justify-end gap-6 sm:gap-4 border-t sm:border-0 pt-3 sm:pt-0">
                   <div
-                    className={`text-lg font-semibold ${
+                    className={`text-lg font-bold ${
                       transaction.type === "income"
                         ? "text-success"
                         : "text-destructive"
@@ -311,21 +314,22 @@ export function TransactionList({
                     {transaction.type === "income" ? "+" : "-"}
                     {formatCurrency(transaction.amount)}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <TransactionForm
                       transaction={transaction}
                       onSuccess={() => router.refresh()}
                     />
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="icon"
+                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                       onClick={() => openDeleteDialog(transaction.id)}
                       disabled={isDeleting === transaction.id}
                     >
                       {isDeleting === transaction.id ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <Trash2 className="h-4 w-4" />
                       )}
                     </Button>
                   </div>

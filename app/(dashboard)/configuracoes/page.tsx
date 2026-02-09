@@ -40,9 +40,9 @@ export default async function ConfiguracoesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Configurações</h1>
-        <p className="text-muted-foreground">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Configurações</h1>
+        <p className="text-muted-foreground text-sm">
           Gerencie sua conta e assinatura
         </p>
       </div>
@@ -99,7 +99,7 @@ export default async function ConfiguracoesPage() {
       {/* Categories Section */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle>Categorias Personalizadas</CardTitle>
               <CardDescription>

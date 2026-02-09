@@ -36,14 +36,14 @@ export default async function TransacoesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Transações</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Transações</h1>
+          <p className="text-muted-foreground text-sm">
             Gerencie suas receitas e despesas
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
           <OFXImport />
           <TransactionForm />
         </div>
