@@ -1,0 +1,168 @@
+// Prisma Schema para MEIKon
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo de Usuário
+model User {
+  id            String         @id @default(cuid())
+  name          String?
+  email         String         @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  // Limites MEI
+  yearlyLimit   Float          @default(81000)
+  
+  // Relações
+  accounts      Account[]
+  sessions      Session[]
+  transactions  Transaction[]
+  subscription  Subscription?
+  categories    Category[]
+  contacts      Contact[]
+  goals         Goal[]
+}
+
+// NextAuth - Accounts
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+// NextAuth - Sessions
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Transações (receitas e despesas)
+model Transaction {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  contactId   String?
+  contact     Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  
+  type        String   // "income" | "expense"
+  amount      Float
+  description String
+  category    String
+  date        DateTime
+  isPaid      Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([date])
+  @@index([type])
+}
+
+// Contatos (Clientes e Fornecedores)
+model Contact {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name      String
+  email     String?
+  phone     String?
+  type      String   // "client" | "provider" | "both"
+  
+  transactions Transaction[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+// Metas Mensais
+model Goal {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  month        Int      // 1-12
+  year         Int
+  targetAmount Float
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([userId, month, year])
+  @@index([userId])
+}
+
+// Categorias personalizadas
+model Category {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name   String
+  type   String // "income" | "expense"
+  color  String @default("#6366f1")
+  icon   String @default("tag")
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, name, type])
+}
+
+// Assinaturas (Stripe)
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  stripeCustomerId       String   @unique
+  stripeSubscriptionId   String?  @unique
+  stripePriceId          String?
+  stripeCurrentPeriodEnd DateTime?
+  
+  status    String   // "active" | "canceled" | "trialing" | "past_due"
+  plan      String   @default("free") // "free" | "pro"
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Token de verificação de email
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+

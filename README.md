@@ -1,73 +1,204 @@
-# Welcome to your Lovable project
+# 💰 MEIKon - Gestão Financeira para MEI
 
-## Project info
+Sistema completo de gestão financeira desenvolvido especificamente para Microempreendedores Individuais (MEI).
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 🚀 Tecnologias
 
-## How can I edit this code?
+- **Framework**: Next.js 14 (App Router)
+- **Linguagem**: TypeScript
+- **Estilização**: Tailwind CSS + shadcn/ui
+- **Banco de Dados**: PostgreSQL (Supabase) + Prisma ORM
+- **Autenticação**: NextAuth.js
+- **Pagamentos**: Stripe
+- **Gráficos**: Recharts
 
-There are several ways of editing your application.
+## ✨ Funcionalidades
 
-**Use Lovable**
+### 📊 Dashboard
+- Visão geral das finanças
+- Gráficos de receitas e despesas
+- Indicadores de limite de transações
+- Transações recentes
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### 💸 Transações
+- ✅ CRUD completo de transações
+- ✅ Filtros avançados (tipo, status, datas)
+- ✅ Paginação (10 itens por página)
+- ✅ Categorias predefinidas e personalizadas
+- ✅ Status de pagamento (Pago/Pendente)
+- ✅ Validação de limite (Plano Free: 50 transações)
 
-Changes made via Lovable will be committed automatically to this repo.
+### 📈 Relatórios
+- ✅ Exportação para CSV
+- ✅ Gráfico de evolução mensal
+- ✅ Análise por categoria (Pie Charts)
+- ✅ Top 5 categorias de receita/despesa
+- ✅ Cards de resumo detalhados
 
-**Use your preferred IDE**
+### 🎨 Categorias Personalizadas
+- ✅ Criar/Editar/Deletar categorias
+- ✅ Seletor de ícones (15 opções)
+- ✅ Seletor de cores (10 opções)
+- ✅ Preview em tempo real
+- ✅ Validação de uso
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### ⚙️ Configurações
+- Gerenciamento de perfil
+- Controle de assinatura
+- Gerenciamento de categorias
+- Planos Free e PRO
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 📱 Responsividade
+- ✅ Menu hamburguer mobile
+- ✅ Drawer sidebar
+- ✅ Layout 100% responsivo
+- ✅ Touch-friendly interface
 
-Follow these steps:
+### 🎯 UX/UI
+- ✅ Error boundaries
+- ✅ Skeleton loading states
+- ✅ Animações suaves
+- ✅ Toast notifications
+- ✅ Confirmações de ações
+- ✅ Formatação pt-BR
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🏗️ Estrutura do Projeto
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+```
+MEIKon-your-business-cash-flow/
+├── app/                          # Next.js App Router
+├── components/                   # Componentes React
+├── lib/                          # Utilitários
+├── prisma/                       # Prisma ORM
+└── public/                       # Arquivos estáticos
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 🚀 Quick Start
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### 1. Clonar e Instalar
+
+```bash
+git clone <repository-url>
+cd MEIKon-your-business-cash-flow
+npm install
+```
+
+### 2. Configurar Variáveis de Ambiente
+
+Copie `.env.example` para `.env` e preencha:
+
+```env
+# Database (Supabase)
+DATABASE_URL="postgresql://..."
+
+# NextAuth
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-secret-here"
+
+# Stripe
+STRIPE_SECRET_KEY="sk_test_..."
+STRIPE_PUBLISHABLE_KEY="pk_test_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."
+STRIPE_PRICE_ID="price_..."
+
+# App
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
+
+### 3. Configurar Banco de Dados
+
+```bash
+# Sincronizar schema com o banco
+npm run db:push
+
+# (Opcional) Abrir Prisma Studio
+npm run db:studio
+```
+
+### 4. Executar em Desenvolvimento
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Acesse: `http://localhost:3000`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### 5. Build para Produção
 
-**Use GitHub Codespaces**
+```bash
+npm run build
+npm start
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 📊 Planos
 
-## What technologies are used for this project?
+### Free
+- ✅ Até 50 transações/mês
+- ✅ Relatórios básicos
+- ✅ Categorias padrão
 
-This project is built with:
+### PRO (R$ 39/mês)
+- ✅ Transações ilimitadas
+- ✅ Relatórios avançados
+- ✅ Categorias personalizadas
+- ✅ Exportação CSV
+- ✅ 14 dias grátis
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🔐 Segurança
 
-## How can I deploy this project?
+- ✅ Autenticação com NextAuth.js
+- ✅ Senhas com bcrypt
+- ✅ Sessões JWT
+- ✅ Proteção CSRF
+- ✅ Validação server-side (Zod)
+- ✅ Verificação de ownership
+- ✅ Webhook security (Stripe)
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+## 📚 Documentação
 
-## Can I connect a custom domain to my Lovable project?
+Toda a documentação está na pasta `/docs`:
 
-Yes, you can!
+- **QUICK-START.md** - Guia rápido de 5-10 minutos
+- **GUIA-IMPLEMENTACAO.md** - Guia completo de implementação
+- **PROJECT-SUMMARY.md** - Resumo do projeto
+- **IMPLEMENTACOES-CONCLUIDAS.md** - Features de alta prioridade
+- **MEDIA-PRIORIDADE-COMPLETO.md** - Features de média prioridade
+- **PROBLEMAS-CORRIGIDOS.md** - Problemas resolvidos
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 🛠️ Scripts Disponíveis
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+```bash
+npm run dev          # Desenvolvimento
+npm run build        # Build produção
+npm start            # Executar produção
+npm run lint         # Linting
+npm run db:push      # Sync Prisma schema
+npm run db:studio    # Prisma Studio
+```
+
+## 🎯 Status do Projeto
+
+✅ **Alta Prioridade**: 100% Completo
+- Página de Transações
+- Página de Relatórios
+
+✅ **Média Prioridade**: 100% Completo
+- Categorias Personalizadas
+- Melhorias de UX
+- Responsividade Mobile
+
+## 📝 Licença
+
+Este projeto é privado e proprietário.
+
+## 👨‍💻 Desenvolvido com
+
+- ❤️ Paixão
+- ☕ Muito café
+- 🚀 Next.js 14
+- 🎨 Tailwind CSS
+- 💎 TypeScript
+
+---
+
+**MEIKon** - Gestão Financeira Simples e Eficiente para MEI
