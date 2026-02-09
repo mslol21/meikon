@@ -44,11 +44,10 @@ export async function POST(req: Request) {
       })
     }
 
-    // Calcular data de início (14 dias de teste)
-    // O MercadoPago exige o formato ISO8601 completo (YYYY-MM-DDThh:mm:ss.sssZ)
+    // Calcular data de início (COMEÇO IMEDIATO para ativação da conta)
     const startDate = new Date()
-    startDate.setDate(startDate.getDate() + 14)
-    startDate.setMilliseconds(0) // Garantir milissegundos zerados mas presentes
+    startDate.setSeconds(startDate.getSeconds() + 30) // 30 segundos no futuro para evitar erro de atraso
+    startDate.setMilliseconds(0) 
 
     // Validar URL de retorno (obrigatório ser absoluta para o MercadoPago)
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://meikon.vercel.app"
