@@ -22,170 +22,186 @@ async function getCategories(userId: string) {
 }
 
 export default async function ConfiguracoesPage() {
-  const session = await getServerSession(authOptions)
-  const [subscription, categories] = await Promise.all([
-    getSubscription(session!.user.id),
-    getCategories(session!.user.id),
-  ])
+  try {
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.id) {
+       return <div>Não autorizado</div>
+    }
 
-  const isPro = subscription?.plan === "pro"
+    const [subscription, categories] = await Promise.all([
+      getSubscription(session.user.id),
+      getCategories(session.user.id),
+    ])
 
+    const isPro = subscription?.plan === "pro"
 
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Configurações</h1>
+          <p className="text-muted-foreground">
+            Gerencie sua conta e assinatura
+          </p>
+        </div>
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Configurações</h1>
-        <p className="text-muted-foreground">
-          Gerencie sua conta e assinatura
-        </p>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Profile Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Perfil</CardTitle>
-            <CardDescription>Informações da sua conta</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="text-sm font-medium">Nome</p>
-              <p className="text-sm text-muted-foreground">{session?.user.name}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium">Email</p>
-              <p className="text-sm text-muted-foreground">{session?.user.email}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Subscription Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Assinatura</CardTitle>
-            <CardDescription>Plano atual e benefícios</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Profile Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Perfil</CardTitle>
+              <CardDescription>Informações da sua conta</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div>
-                <p className="text-sm font-medium">Plano Atual</p>
-                <p className="text-2xl font-bold">
-                  {isPro ? "PRO" : "FREE"}
+                <p className="text-sm font-medium">Nome</p>
+                <p className="text-sm text-muted-foreground">{session?.user.name}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Email</p>
+                <p className="text-sm text-muted-foreground">{session?.user.email}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Subscription Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Assinatura</CardTitle>
+              <CardDescription>Plano atual e benefícios</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Plano Atual</p>
+                  <p className="text-2xl font-bold">
+                    {isPro ? "PRO" : "FREE"}
+                  </p>
+                </div>
+                {isPro && (
+                  <div className="rounded-full bg-primary p-2">
+                    <Crown className="h-5 w-5 text-primary-foreground" />
+                  </div>
+                )}
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-2">Status</p>
+                <p className="text-sm text-muted-foreground capitalize">
+                  {subscription?.status || "Inativo"}
                 </p>
               </div>
-              {isPro && (
-                <div className="rounded-full bg-primary p-2">
-                  <Crown className="h-5 w-5 text-primary-foreground" />
-                </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Categories Section */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Categorias Personalizadas</CardTitle>
+                <CardDescription>
+                  Gerencie suas categorias de receitas e despesas
+                </CardDescription>
+              </div>
+              <CategoryForm />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <CategoryList categories={categories} />
+          </CardContent>
+        </Card>
+
+        {/* Pricing Cards */}
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Free Plan */}
+          <Card className={!isPro ? "border-primary" : ""}>
+            <CardHeader>
+              <CardTitle>Plano Free</CardTitle>
+              <div className="mt-4">
+                <span className="text-4xl font-bold">R$ 0</span>
+                <span className="text-muted-foreground">/mês</span>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <ul className="space-y-2">
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-success" />
+                  <span className="text-sm">Até 50 transações/mês</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-success" />
+                  <span className="text-sm">Relatórios básicos</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-success" />
+                  <span className="text-sm">Categorias padrão</span>
+                </li>
+              </ul>
+              {!isPro && (
+                <p className="text-sm font-medium text-primary">Plano Atual</p>
               )}
-            </div>
-            <div>
-              <p className="text-sm font-medium mb-2">Status</p>
-              <p className="text-sm text-muted-foreground capitalize">
-                {subscription?.status}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          {/* Pro Plan */}
+          <Card className={isPro ? "border-primary" : ""}>
+            <CardHeader>
+              <div className="mb-2 inline-block rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+                Mais Popular
+              </div>
+              <CardTitle>Plano PRO</CardTitle>
+              <div className="mt-4">
+                <span className="text-4xl font-bold">R$ 39</span>
+                <span className="text-muted-foreground">/mês</span>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <ul className="space-y-2">
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-success" />
+                  <span className="text-sm">Transações ilimitadas</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-success" />
+                  <span className="text-sm">Importação de Extrato (OFX)</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-success" />
+                  <span className="text-sm">Gestão de Metas Mensais</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-success" />
+                  <span className="text-sm">Exportação CSV</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-success" />
+                  <span className="text-sm">14 dias grátis</span>
+                </li>
+              </ul>
+              {isPro ? (
+                  <div>
+                    <p className="text-sm font-medium text-primary mb-2">Plano Atual</p>
+                    <UpgradeButton isPro variant="outline" />
+                  </div>
+              ) : (
+                <UpgradeButton />
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
-
-      {/* Categories Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Categorias Personalizadas</CardTitle>
-              <CardDescription>
-                Gerencie suas categorias de receitas e despesas
-              </CardDescription>
-            </div>
-            <CategoryForm />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <CategoryList categories={categories} />
-        </CardContent>
-      </Card>
-
-      {/* Pricing Cards */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Free Plan */}
-        <Card className={!isPro ? "border-primary" : ""}>
-          <CardHeader>
-            <CardTitle>Plano Free</CardTitle>
-            <div className="mt-4">
-              <span className="text-4xl font-bold">R$ 0</span>
-              <span className="text-muted-foreground">/mês</span>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <ul className="space-y-2">
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-success" />
-                <span className="text-sm">Até 50 transações/mês</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-success" />
-                <span className="text-sm">Relatórios básicos</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-success" />
-                <span className="text-sm">Categorias padrão</span>
-              </li>
-            </ul>
-            {!isPro && (
-              <p className="text-sm font-medium text-primary">Plano Atual</p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Pro Plan */}
-        <Card className={isPro ? "border-primary" : ""}>
-          <CardHeader>
-            <div className="mb-2 inline-block rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
-              Mais Popular
-            </div>
-            <CardTitle>Plano PRO</CardTitle>
-            <div className="mt-4">
-              <span className="text-4xl font-bold">R$ 39</span>
-              <span className="text-muted-foreground">/mês</span>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <ul className="space-y-2">
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-success" />
-                <span className="text-sm">Transações ilimitadas</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-success" />
-                <span className="text-sm">Importação de Extrato (OFX)</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-success" />
-                <span className="text-sm">Gestão de Metas Mensais</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-success" />
-                <span className="text-sm">Exportação CSV</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-success" />
-                <span className="text-sm">14 dias grátis</span>
-              </li>
-            </ul>
-            {isPro ? (
-                <div>
-                  <p className="text-sm font-medium text-primary mb-2">Plano Atual</p>
-                  <UpgradeButton isPro variant="outline" />
-                </div>
-            ) : (
-              <UpgradeButton />
-            )}
-          </CardContent>
-        </Card>
+    )
+  } catch (error: any) {
+    console.error("Erro na página de configurações:", error)
+    return (
+      <div className="p-4 border border-destructive rounded-lg bg-destructive/10">
+        <h2 className="text-lg font-bold text-destructive">Erro ao carregar configurações</h2>
+        <pre className="mt-2 p-2 bg-background rounded text-xs overflow-auto">
+          {error.message}
+          {error.stack}
+        </pre>
       </div>
-    </div>
-  )
+    )
+  }
 }
