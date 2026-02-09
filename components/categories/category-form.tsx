@@ -22,25 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import {
-  Plus,
-  Loader2,
-  DollarSign,
-  ShoppingCart,
-  Briefcase,
-  Home,
-  Car,
-  Coffee,
-  Zap,
-  Package,
-  TrendingUp,
-  CreditCard,
-  Wallet,
-  PiggyBank,
-  Receipt,
-  FileText,
-  Utensils,
-} from "lucide-react"
+import { Crown, Plus, Loader2, DollarSign, ShoppingCart, Briefcase, Home, Car, Coffee, Zap, Package, TrendingUp, CreditCard, Wallet, PiggyBank, Receipt, FileText, Utensils } from "lucide-react"
+import Link from "next/link"
 
 interface Category {
   id: string
@@ -52,6 +35,7 @@ interface Category {
 
 interface CategoryFormProps {
   category?: Category
+  isPro?: boolean
   onSuccess?: () => void
 }
 
@@ -86,7 +70,7 @@ const COLORS = [
   { name: "Cinza", value: "#6b7280" },
 ]
 
-export function CategoryForm({ category, onSuccess }: CategoryFormProps) {
+export function CategoryForm({ category, isPro = false, onSuccess }: CategoryFormProps) {
   const router = useRouter()
   const { toast } = useToast()
   const [open, setOpen] = useState(false)
@@ -96,6 +80,20 @@ export function CategoryForm({ category, onSuccess }: CategoryFormProps) {
   const [selectedColor, setSelectedColor] = useState(category?.color || "#2563eb")
 
   const isEditing = !!category
+
+  if (!isPro && !isEditing) {
+    return (
+      <Button className="gap-2" variant="outline" onClick={() => {
+        toast({
+          title: "Funcionalidade PRO",
+          description: "A criação de categorias personalizadas é exclusiva do plano PRO.",
+        })
+      }}>
+        <Plus className="h-4 w-4" />
+        Nova Categoria
+      </Button>
+    )
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()

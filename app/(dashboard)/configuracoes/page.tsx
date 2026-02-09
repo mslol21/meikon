@@ -106,11 +106,11 @@ export default async function ConfiguracoesPage() {
                 Gerencie suas categorias de receitas e despesas
               </CardDescription>
             </div>
-            <CategoryForm />
+            <CategoryForm isPro={isPro} />
           </div>
         </CardHeader>
         <CardContent>
-          <CategoryList categories={categories} />
+          <CategoryList categories={categories} isPro={isPro} />
         </CardContent>
       </Card>
 

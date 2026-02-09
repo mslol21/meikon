@@ -54,6 +54,18 @@ export async function POST(req: Request) {
     const body = await req.json()
     const data = categorySchema.parse(body)
 
+    // Check subscription plan
+    const subscription = await prisma.subscription.findUnique({
+      where: { userId: session.user.id },
+    })
+
+    if (subscription?.plan !== "pro") {
+      return NextResponse.json(
+        { error: "A criação de categorias personalizadas é exclusiva do plano PRO." },
+        { status: 403 }
+      )
+    }
+
     // Check if category already exists
     const existing = await prisma.category.findFirst({
       where: {

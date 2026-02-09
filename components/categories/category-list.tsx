@@ -27,9 +27,10 @@ interface Category {
 
 interface CategoryListProps {
   categories: Category[]
+  isPro?: boolean
 }
 
-export function CategoryList({ categories }: CategoryListProps) {
+export function CategoryList({ categories, isPro }: CategoryListProps) {
   const router = useRouter()
   const { toast } = useToast()
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
@@ -123,6 +124,7 @@ export function CategoryList({ categories }: CategoryListProps) {
                   <div className="flex items-center gap-2">
                     <CategoryForm
                       category={category}
+                      isPro={isPro}
                       onSuccess={() => router.refresh()}
                     />
                     <Button
@@ -182,6 +184,7 @@ export function CategoryList({ categories }: CategoryListProps) {
                   <div className="flex items-center gap-2">
                     <CategoryForm
                       category={category}
+                      isPro={isPro}
                       onSuccess={() => router.refresh()}
                     />
                     <Button
