@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     }
 
     // If user already has a Stripe subscription, redirect to portal
-    if (subscription.stripeSubscriptionId) {
+    if (subscription.stripeSubscriptionId && subscription.stripeCustomerId) {
       const portalSession = await stripe.billingPortal.sessions.create({
         customer: subscription.stripeCustomerId,
         return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
@@ -40,12 +40,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ url: portalSession.url })
     }
 
+    const stripeCustomerId = subscription.stripeCustomerId || `temp_${session.user.id}`
+
     // Create checkout session for new subscription
     const checkoutSession = await stripe.checkout.sessions.create({
-      customer: subscription.stripeCustomerId.startsWith("temp_")
+      customer: stripeCustomerId.startsWith("temp_")
         ? undefined
-        : subscription.stripeCustomerId,
-      customer_email: subscription.stripeCustomerId.startsWith("temp_")
+        : stripeCustomerId,
+      customer_email: stripeCustomerId.startsWith("temp_")
         ? session.user.email!
         : undefined,
       mode: "subscription",
