@@ -32,33 +32,54 @@ export async function POST(req: Request) {
       }
     }
 
+    // Garantir que exista um registro de subscription (mesmo que free) para o usuário
+    if (!subscription) {
+      await prisma.subscription.create({
+        data: {
+          userId: session.user.id,
+          status: "active",
+          plan: "free",
+        },
+      })
+    }
+
     // Calcular data de início (14 dias de teste)
+    // O MercadoPago exige que o start_date contenha também o fuso horário (Z)
     const startDate = new Date()
     startDate.setDate(startDate.getDate() + 14)
+    startDate.setSeconds(0, 0) // Limpar milissegundos
 
-    const result = await preapproval.create({
-      body: {
-        reason: "Assinatura MEIKon Pro",
-        auto_recurring: {
-          frequency: 1,
-          frequency_type: "months",
-          transaction_amount: 39,
-          currency_id: "BRL",
-          start_date: startDate.toISOString(),
-        },
-        payer_email: session.user.email,
-        back_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true`,
-        external_reference: session.user.id,
-        status: "pending",
-      }
-    })
+    try {
+      const result = await preapproval.create({
+        body: {
+          reason: "Assinatura MEIKon Pro",
+          auto_recurring: {
+            frequency: 1,
+            frequency_type: "months",
+            transaction_amount: 39,
+            currency_id: "BRL",
+            start_date: startDate.toISOString().split('.')[0] + 'Z', // Formato simplificado ISO
+          },
+          payer_email: session.user.email,
+          back_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true`,
+          external_reference: session.user.id,
+          status: "pending",
+        }
+      })
 
-    return NextResponse.json({ url: result.init_point })
+      return NextResponse.json({ url: result.init_point })
+    } catch (mpError: any) {
+      console.error("MercadoPago API Error Details:", JSON.stringify(mpError, null, 2))
+      return NextResponse.json(
+        { error: mpError.message || "Erro na API do MercadoPago" },
+        { status: 500 }
+      )
+    }
 
-  } catch (error) {
-    console.error("MercadoPago Checkout error:", error)
+  } catch (error: any) {
+    console.error("General Checkout error:", error)
     return NextResponse.json(
-      { error: "Erro ao criar assinatura no MercadoPago" },
+      { error: error.message || "Erro ao criar assinatura" },
       { status: 500 }
     )
   }
