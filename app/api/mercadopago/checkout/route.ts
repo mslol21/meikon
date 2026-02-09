@@ -45,10 +45,10 @@ export async function POST(req: Request) {
     }
 
     // Calcular data de início (14 dias de teste)
-    // O MercadoPago exige que o start_date contenha também o fuso horário (Z)
+    // O MercadoPago exige o formato ISO8601 completo (YYYY-MM-DDThh:mm:ss.sssZ)
     const startDate = new Date()
     startDate.setDate(startDate.getDate() + 14)
-    startDate.setSeconds(0, 0) // Limpar milissegundos
+    startDate.setMilliseconds(0) // Garantir milissegundos zerados mas presentes
 
     // Validar URL de retorno (obrigatório ser absoluta para o MercadoPago)
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://meikon.vercel.app"
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
             frequency_type: "months",
             transaction_amount: 39,
             currency_id: "BRL",
-            start_date: startDate.toISOString().split('.')[0] + 'Z', // Formato simplificado ISO
+            start_date: startDate.toISOString(),
           },
           payer_email: session.user.email,
           back_url: back_url,
