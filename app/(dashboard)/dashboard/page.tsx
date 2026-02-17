@@ -45,7 +45,7 @@ async function getDashboardData(userId: string) {
     })
   ])
 
-  let products = []
+  let products: any[] = []
   try {
     products = await prisma.product.findMany({
       where: { userId },
