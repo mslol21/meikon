@@ -40,7 +40,12 @@ async function getChartData(userId: string) {
 }
 
 export async function ChartOverview({ userId }: { userId: string }) {
-  const data = await getChartData(userId)
+  let data = []
+  try {
+    data = await getChartData(userId)
+  } catch (error) {
+    console.warn("Gráfico temporariamente indisponível durante sincronização.")
+  }
 
   return (
     <Card className="col-span-1">
