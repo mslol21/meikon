@@ -40,7 +40,7 @@ async function getChartData(userId: string) {
 }
 
 export async function ChartOverview({ userId }: { userId: string }) {
-  let data = []
+  let data: any[] = []
   try {
     data = await getChartData(userId)
   } catch (error) {
