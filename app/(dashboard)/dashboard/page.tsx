@@ -44,15 +44,14 @@ async function getDashboardData(userId: string) {
       }
     }),
     prisma.product.findMany({
-      where: {
-        userId,
-        stock: {
-          lte: prisma.product.fields.minStock
-        }
-      },
-      take: 3
+      where: { userId },
+      orderBy: { stock: "asc" },
+      take: 50
     })
   ])
+
+  // Filtrar produtos com estoque baixo em memória (Prisma não suporta comparação de colunas direta no where)
+  const lowStockProducts = products.filter(p => p.stock <= p.minStock).slice(0, 3)
 
   // Todas as transações do mês atual para calcular o atingimento da meta
   const monthTransactions = await prisma.transaction.findMany({
@@ -102,7 +101,7 @@ async function getDashboardData(userId: string) {
     transactionCount,
     isDasPaid: !!dasPayment,
     isGoalSet: !!goals.find(g => g.month === currentMonth && g.year === currentYear),
-    lowStockProducts: products,
+    lowStockProducts: lowStockProducts,
   }
 }
 
