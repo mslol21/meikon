@@ -42,6 +42,12 @@ interface Transaction {
   category: string
   date: Date
   isPaid: boolean
+  productId?: string | null
+  quantity?: number | null
+  product?: {
+    name: string
+    unit: string
+  } | null
 }
 
 interface TransactionListProps {
@@ -292,6 +298,12 @@ export function TransactionList({
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-0.5">
                       <span className="font-medium text-foreground/70">{transaction.category}</span>
                       <span>•</span>
+                      {transaction.product && (
+                        <>
+                          <span className="text-primary font-semibold">{transaction.product.name} ({transaction.quantity} {transaction.product.unit})</span>
+                          <span>•</span>
+                        </>
+                      )}
                       <span>{formatDate(transaction.date)}</span>
                       <Badge
                         variant={transaction.isPaid ? "success" : "secondary"}

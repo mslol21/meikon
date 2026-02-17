@@ -31,6 +31,7 @@ model User {
   categories    Category[]
   contacts      Contact[]
   goals         Goal[]
+  products      Product[]
 }
 
 // NextAuth - Accounts
@@ -71,12 +72,16 @@ model Transaction {
   contactId   String?
   contact     Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
   
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  
   type        String   // "income" | "expense"
   amount      Float
   description String
   category    String
   date        DateTime
   isPaid      Boolean  @default(true)
+  quantity    Int      @default(1)
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -130,13 +135,43 @@ model Category {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   name   String
-  type   String // "income" | "expense"
+  type   String // "income" | "expense" | "product"
   color  String @default("#6366f1")
   icon   String @default("tag")
+  
+  products Product[]
   
   createdAt DateTime @default(now())
   
   @@unique([userId, name, type])
+}
+
+// Produtos (Inventário)
+model Product {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name        String
+  description String?
+  sku         String?
+  price       Float
+  costPrice   Float?
+  stock       Int      @default(0)
+  minStock    Int      @default(0)
+  unit        String   @default("un")
+  
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  
+  image       String?
+  
+  transactions Transaction[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
 }
 
 // Assinaturas (Stripe & MercadoPago)
@@ -172,4 +207,3 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
-

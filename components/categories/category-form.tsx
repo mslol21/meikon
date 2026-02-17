@@ -205,6 +205,7 @@ export function CategoryForm({ category, isPro = false, onSuccess }: CategoryFor
                 <SelectContent>
                   <SelectItem value="income">Receita</SelectItem>
                   <SelectItem value="expense">Despesa</SelectItem>
+                  <SelectItem value="product">Produto</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -18,6 +18,7 @@ import {
   BarChart3,
   Settings,
   Menu,
+  Package,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -31,6 +32,11 @@ const routes = [
     label: "Transações",
     icon: Receipt,
     href: "/transacoes",
+  },
+  {
+    label: "Inventário",
+    icon: Package,
+    href: "/inventario",
   },
   {
     label: "Relatórios",

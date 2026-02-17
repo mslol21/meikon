@@ -2,6 +2,7 @@
 
 import { UserNav } from "./user-nav"
 import { MobileSidebar } from "./mobile-sidebar"
+import { OfflineBadge } from "./offline-badge"
 
 export function Navbar() {
   return (
@@ -15,7 +16,10 @@ export function Navbar() {
           </p>
         </div>
       </div>
-      <UserNav />
+      <div className="flex items-center gap-4">
+        <OfflineBadge />
+        <UserNav />
+      </div>
     </header>
   )
 }

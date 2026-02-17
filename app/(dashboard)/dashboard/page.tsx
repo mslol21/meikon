@@ -42,6 +42,15 @@ async function getDashboardData(userId: string) {
           lt: new Date(currentYear, currentMonth, 1),
         }
       }
+    }),
+    prisma.product.findMany({
+      where: {
+        userId,
+        stock: {
+          lte: prisma.product.fields.minStock
+        }
+      },
+      take: 3
     })
   ])
 
@@ -93,6 +102,7 @@ async function getDashboardData(userId: string) {
     transactionCount,
     isDasPaid: !!dasPayment,
     isGoalSet: !!goals.find(g => g.month === currentMonth && g.year === currentYear),
+    lowStockProducts: products,
   }
 }
 
@@ -102,7 +112,7 @@ import { OnboardingChecklist } from "@/components/dashboard/onboarding-checklist
 import { GovHub } from "@/components/dashboard/gov-hub"
 import { MobileFloatingActions } from "@/components/dashboard/mobile-floating-actions"
 import { formatCurrency, cn } from "@/lib/utils"
-import { AlertTriangle, Crown } from "lucide-react"
+import { AlertTriangle, Crown, Package, ArrowRight } from "lucide-react"
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
@@ -156,6 +166,33 @@ export default async function DashboardPage() {
                 <p className="text-sm font-bold">{formatCurrency(data.yearlyIncome)}</p>
                 <p className="text-[10px] text-muted-foreground uppercase">acumulado no ano</p>
               </div>
+            </div>
+          </CardHeader>
+        </Card>
+      )}
+
+      {/* Alerta de Estoque Baixo */}
+      {data.lowStockProducts.length > 0 && (
+        <Card className="border-l-4 border-l-amber-500 bg-amber-50/50 dark:bg-amber-900/10">
+          <CardHeader className="py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600">
+                  <Package className="h-4 w-4" />
+                </div>
+                <div>
+                  <CardTitle className="text-sm font-bold">Reposição Necessária</CardTitle>
+                  <CardDescription className="text-xs">
+                    Você tem <strong>{data.lowStockProducts.length}</strong> {data.lowStockProducts.length === 1 ? 'produto' : 'produtos'} com estoque baixo.
+                  </CardDescription>
+                </div>
+              </div>
+              <Link href="/inventario">
+                <Button variant="ghost" size="sm" className="text-xs gap-2">
+                  Gerenciar Estoque
+                  <ArrowRight className="h-3 w-3" />
+                </Button>
+              </Link>
             </div>
           </CardHeader>
         </Card>

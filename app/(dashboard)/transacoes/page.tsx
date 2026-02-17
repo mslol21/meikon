@@ -12,6 +12,14 @@ async function getTransactions(userId: string) {
     prisma.transaction.findMany({
       where: { userId },
       orderBy: { date: "desc" },
+      include: {
+        product: {
+          select: {
+            name: true,
+            unit: true
+          }
+        }
+      }
     }),
     prisma.transaction.count({ where: { userId } }),
     prisma.subscription.findUnique({ where: { userId } }),

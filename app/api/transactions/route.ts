@@ -11,6 +11,8 @@ const transactionSchema = z.object({
   category: z.string().min(1, "Categoria é obrigatória"),
   date: z.string().datetime(),
   isPaid: z.boolean().default(true),
+  productId: z.string().optional().nullable(),
+  quantity: z.number().int().positive().optional().nullable(),
 })
 
 export async function GET(req: Request) {
@@ -86,16 +88,40 @@ export async function POST(req: Request) {
       }
     }
 
-    const transaction = await prisma.transaction.create({
-      data: {
-        type: data.type,
-        amount: data.amount,
-        description: data.description,
-        category: data.category,
-        date: new Date(data.date),
-        isPaid: data.isPaid,
-        userId: session.user.id,
-      },
+    const transaction = await prisma.$transaction(async (tx) => {
+      const newTransaction = await tx.transaction.create({
+        data: {
+          type: data.type,
+          amount: data.amount,
+          description: data.description,
+          category: data.category,
+          date: new Date(data.date),
+          isPaid: data.isPaid,
+          userId: session.user.id,
+          productId: data.productId,
+          quantity: data.quantity || 1,
+        },
+      })
+
+      // Update product stock if applicable
+      if (data.type === "income" && data.productId) {
+        const product = await tx.product.findUnique({
+          where: { id: data.productId }
+        })
+
+        if (product && product.userId === session.user.id) {
+          await tx.product.update({
+            where: { id: data.productId },
+            data: {
+              stock: {
+                decrement: data.quantity || 1
+              }
+            }
+          })
+        }
+      }
+
+      return newTransaction
     })
 
     return NextResponse.json(transaction, { status: 201 })

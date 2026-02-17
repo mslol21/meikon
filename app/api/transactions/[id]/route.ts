@@ -11,6 +11,8 @@ const updateSchema = z.object({
   category: z.string().min(1).optional(),
   date: z.string().datetime().optional(),
   isPaid: z.boolean().optional(),
+  productId: z.string().optional().nullable(),
+  quantity: z.number().int().positive().optional().nullable(),
 })
 
 export async function PUT(
@@ -42,12 +44,47 @@ export async function PUT(
       )
     }
 
-    const transaction = await prisma.transaction.update({
-      where: { id: params.id },
-      data: {
-        ...data,
-        date: data.date ? new Date(data.date) : undefined,
-      },
+    const transaction = await prisma.$transaction(async (tx) => {
+      // 1. Revert old stock impact if it was an income with a product
+      if (existingTransaction.type === "income" && existingTransaction.productId) {
+        await tx.product.update({
+          where: { id: existingTransaction.productId },
+          data: {
+            stock: {
+              increment: (existingTransaction as any).quantity || 1
+            }
+          }
+        })
+      }
+
+      // 2. Update the transaction
+      const updated = await tx.transaction.update({
+        where: { id: params.id },
+        data: {
+          ...data,
+          date: data.date ? new Date(data.date) : undefined,
+          productId: data.productId,
+          quantity: data.quantity,
+        },
+      })
+
+      // 3. Apply new stock impact if it's an income with a product
+      const finalType = data.type || existingTransaction.type
+      const finalProductId = data.productId !== undefined ? data.productId : existingTransaction.productId
+      const finalQuantity = data.quantity !== undefined ? data.quantity : (existingTransaction as any).quantity
+
+      if (finalType === "income" && finalProductId) {
+        await tx.product.update({
+          where: { id: finalProductId },
+          data: {
+            stock: {
+              decrement: finalQuantity || 1
+            }
+          }
+        })
+      }
+
+      return updated
     })
 
     return NextResponse.json(transaction)
@@ -93,8 +130,22 @@ export async function DELETE(
       )
     }
 
-    await prisma.transaction.delete({
-      where: { id: params.id },
+    await prisma.$transaction(async (tx) => {
+      // If the transaction had a product associated, restore the stock
+      if (existingTransaction.type === "income" && existingTransaction.productId) {
+        await tx.product.update({
+          where: { id: existingTransaction.productId },
+          data: {
+            stock: {
+              increment: (existingTransaction as any).quantity || 1
+            }
+          }
+        })
+      }
+
+      await tx.transaction.delete({
+        where: { id: params.id },
+      })
     })
 
     return NextResponse.json({ message: "Transação deletada com sucesso" })

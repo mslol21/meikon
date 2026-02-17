@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Home, BarChart3, Wallet, FilePlus, ShieldCheck, Users, Settings } from "lucide-react"
+import { Home, BarChart3, Wallet, FilePlus, ShieldCheck, Users, Settings, Package } from "lucide-react"
 
 const routes = [
   {
@@ -16,6 +16,11 @@ const routes = [
     label: "Transações",
     icon: Wallet,
     href: "/transacoes",
+  },
+  {
+    label: "Inventário",
+    icon: Package,
+    href: "/inventario",
   },
   {
     label: "Relatórios",

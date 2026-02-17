@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -23,6 +24,7 @@ import {
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { Plus, Loader2 } from "lucide-react"
+import { offlineStorage } from "@/lib/offline-storage"
 
 interface Transaction {
   id: string
@@ -32,6 +34,8 @@ interface Transaction {
   category: string
   date: Date
   isPaid: boolean
+  productId?: string | null
+  quantity?: number | null
 }
 
 interface TransactionFormProps {
@@ -63,8 +67,27 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [type, setType] = useState<string>(transaction?.type || "income")
+  const [category, setCategory] = useState<string>(transaction?.category || "")
+  const [products, setProducts] = useState<any[]>([])
 
   const isEditing = !!transaction
+
+  React.useEffect(() => {
+    if (open) {
+      const fetchProducts = async () => {
+        try {
+          const response = await fetch("/api/products")
+          if (response.ok) {
+            const data = await response.json()
+            setProducts(data)
+          }
+        } catch (error) {
+          console.error("Error fetching products:", error)
+        }
+      }
+      fetchProducts()
+    }
+  }, [open])
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -78,6 +101,8 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
       category: formData.get("category") as string,
       date: new Date(formData.get("date") as string).toISOString(),
       isPaid: formData.get("isPaid") === "true",
+      productId: formData.get("productId") === "none" ? null : formData.get("productId"),
+      quantity: formData.get("quantity") ? parseInt(formData.get("quantity") as string) : null,
     }
 
     try {
@@ -111,6 +136,24 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
       router.refresh()
       onSuccess?.()
     } catch (error: any) {
+      if (error instanceof TypeError && !navigator.onLine) {
+        // Network error - likely offline
+        const url = isEditing
+          ? `/api/transactions/${transaction?.id}`
+          : "/api/transactions"
+        const method = isEditing ? "PUT" : "POST"
+        
+        offlineStorage.saveRequest(url, method, data)
+        
+        toast({
+          title: "Modo Offline",
+          description: "Sua transação foi salva localmente e será sincronizada assim que você estiver online.",
+        })
+        setOpen(false)
+        onSuccess?.()
+        return
+      }
+
       toast({
         variant: "destructive",
         title: "Erro",
@@ -201,6 +244,7 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
               <Select
                 name="category"
                 defaultValue={transaction?.category}
+                onValueChange={(value) => setCategory(value)}
                 required
               >
                 <SelectTrigger>
@@ -215,6 +259,41 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
                 </SelectContent>
               </Select>
             </div>
+
+            {type === "income" && category === "Vendas de Produtos" && (
+              <div className="grid gap-4 p-4 rounded-lg bg-primary/5 border border-primary/20">
+                <div className="grid gap-2">
+                  <Label htmlFor="productId">Produto do Inventário</Label>
+                  <Select name="productId" defaultValue={transaction?.productId}>
+                    <SelectTrigger className="bg-background">
+                      <SelectValue placeholder="Selecione o produto para dar baixa" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Nenhum (Venda avulsa)</SelectItem>
+                      {products.map((product) => (
+                        <SelectItem key={product.id} value={product.id}>
+                          {product.name} ({product.stock} em estoque)
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="quantity">Quantidade Vendida</Label>
+                  <Input
+                    id="quantity"
+                    name="quantity"
+                    type="number"
+                    min="1"
+                    defaultValue={transaction?.quantity || 1}
+                    disabled={isLoading}
+                  />
+                  <p className="text-[10px] text-muted-foreground italic">
+                    Ao selecionar um produto, o estoque será atualizado automaticamente após salvar.
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="grid gap-2">
               <Label htmlFor="date">Data</Label>

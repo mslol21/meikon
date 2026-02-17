@@ -79,6 +79,7 @@ export function CategoryList({ categories, isPro }: CategoryListProps) {
 
   const incomeCategories = categories.filter((c) => c.type === "income")
   const expenseCategories = categories.filter((c) => c.type === "expense")
+  const productCategories = categories.filter((c) => c.type === "product")
 
   function getIcon(iconName: string) {
     const IconComponent = (Icons as any)[iconName]
@@ -177,6 +178,66 @@ export function CategoryList({ categories, isPro }: CategoryListProps) {
                       <p className="font-medium">{category.name}</p>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Badge variant="destructive">Despesa</Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <CategoryForm
+                      category={category}
+                      isPro={isPro}
+                      onSuccess={() => router.refresh()}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openDeleteDialog(category)}
+                      disabled={isDeleting === category.id}
+                    >
+                      {isDeleting === category.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Product Categories */}
+      <div>
+        <h3 className="mb-4 text-lg font-semibold">Categorias de Inventário</h3>
+        {productCategories.length === 0 ? (
+          <div className="rounded-lg border p-8 text-center text-muted-foreground">
+            Nenhuma categoria de inventário personalizada
+          </div>
+        ) : (
+          <div className="grid gap-3">
+            {productCategories.map((category) => {
+              const IconComponent = getIcon(category.icon)
+              return (
+                <div
+                  key={category.id}
+                  className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50"
+                >
+                  <div className="flex items-center gap-4">
+                    <div
+                      className="rounded-full p-3"
+                      style={{ backgroundColor: `${category.color}20` }}
+                    >
+                      <IconComponent
+                        className="h-5 w-5"
+                        style={{ color: category.color }}
+                      />
+                    </div>
+                    <div>
+                      <p className="font-medium">{category.name}</p>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Badge variant="outline" className="border-primary text-primary bg-primary/5">Produto</Badge>
                       </div>
                     </div>
                   </div>
