@@ -12,7 +12,7 @@ const transactionSchema = z.object({
   date: z.string().datetime(),
   isPaid: z.boolean().default(true),
   productId: z.string().optional().nullable(),
-  quantity: z.number().int().positive().optional().nullable(),
+  quantity: z.number().int().positive().optional(),
 })
 
 export async function GET(req: Request) {

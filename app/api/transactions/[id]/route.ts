@@ -12,7 +12,7 @@ const updateSchema = z.object({
   date: z.string().datetime().optional(),
   isPaid: z.boolean().optional(),
   productId: z.string().optional().nullable(),
-  quantity: z.number().int().positive().optional().nullable(),
+  quantity: z.number().int().positive().optional(),
 })
 
 export async function PUT(
@@ -64,7 +64,7 @@ export async function PUT(
           ...data,
           date: data.date ? new Date(data.date) : undefined,
           productId: data.productId,
-          quantity: data.quantity,
+          quantity: data.quantity ?? undefined,
         },
       })
 
