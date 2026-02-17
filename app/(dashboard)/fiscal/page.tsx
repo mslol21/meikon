@@ -22,43 +22,53 @@ import { TaxSimulator } from "@/components/dashboard/tax-simulator"
 async function getFiscalData(userId: string) {
   const currentYear = new Date().getFullYear()
   
-  const [user, transactions] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: userId },
-      select: { yearlyLimit: true }
-    }),
-    prisma.transaction.findMany({
-      where: {
-        userId,
-        date: {
-          gte: new Date(currentYear, 0, 1),
-          lte: new Date(currentYear, 11, 31)
+  try {
+    const [user, transactions] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { yearlyLimit: true }
+      }),
+      prisma.transaction.findMany({
+        where: {
+          userId,
+          date: {
+            gte: new Date(currentYear, 0, 1),
+            lte: new Date(currentYear, 11, 31)
+          }
         }
-      }
+      })
+    ])
+
+    const yearlyIncome = transactions
+      .filter(t => t.type === "income")
+      .reduce((sum, t) => sum + t.amount, 0)
+
+    // DAS Tracking: Verificamos se há uma despesa na categoria "Impostos (DAS MEI)" para cada mês
+    const dasPayments = Array.from({ length: 12 }, (_, i) => {
+      const month = i
+      const hasPayment = transactions.some(t => {
+        const tDate = new Date(t.date)
+        return tDate.getMonth() === month && 
+               t.type === "expense" && 
+               t.category === "Impostos (DAS MEI)"
+      })
+      return { month, paid: hasPayment }
     })
-  ])
 
-  const yearlyIncome = transactions
-    .filter(t => t.type === "income")
-    .reduce((sum, t) => sum + t.amount, 0)
-
-  // DAS Tracking: Verificamos se há uma despesa na categoria "Impostos (DAS MEI)" para cada mês
-  const dasPayments = Array.from({ length: 12 }, (_, i) => {
-    const month = i
-    const hasPayment = transactions.some(t => {
-      const tDate = new Date(t.date)
-      return tDate.getMonth() === month && 
-             t.type === "expense" && 
-             t.category === "Impostos (DAS MEI)"
-    })
-    return { month, paid: hasPayment }
-  })
-
-  return {
-    yearlyLimit: user?.yearlyLimit || 81000,
-    yearlyIncome,
-    dasPayments,
-    currentYear
+    return {
+      yearlyLimit: user?.yearlyLimit || 81000,
+      yearlyIncome,
+      dasPayments,
+      currentYear
+    }
+  } catch (error) {
+    console.error("Erro ao buscar dados fiscais:", error)
+    return {
+      yearlyLimit: 81000,
+      yearlyIncome: 0,
+      dasPayments: Array.from({ length: 12 }, (_, i) => ({ month: i, paid: false })),
+      currentYear
+    }
   }
 }
 
