@@ -16,7 +16,7 @@ async function getDashboardData(userId: string) {
   const currentMonth = now.getMonth() + 1
   const currentYear = now.getFullYear()
 
-  const [transactions, subscription, goals, transactionCount, dasPayment, products] = await Promise.all([
+  const [transactions, subscription, goals, transactionCount, dasPayment] = await Promise.all([
     prisma.transaction.findMany({
       where: { userId },
       orderBy: { date: "desc" },
@@ -42,16 +42,22 @@ async function getDashboardData(userId: string) {
           lt: new Date(currentYear, currentMonth, 1),
         }
       }
-    }),
-    prisma.product.findMany({
+    })
+  ])
+
+  let products = []
+  try {
+    products = await prisma.product.findMany({
       where: { userId },
       orderBy: { stock: "asc" },
       take: 50
     })
-  ])
+  } catch (error) {
+    console.warn("Módulo de inventário ainda não sincronizado no banco de dados.")
+  }
 
   // Filtrar produtos com estoque baixo em memória (Prisma não suporta comparação de colunas direta no where)
-  const lowStockProducts = products.filter(p => p.stock <= p.minStock).slice(0, 3)
+  const lowStockProducts = products ? products.filter((p: any) => p.stock <= p.minStock).slice(0, 3) : []
 
   // Todas as transações do mês atual para calcular o atingimento da meta
   const monthTransactions = await prisma.transaction.findMany({
