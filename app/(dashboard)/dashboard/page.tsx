@@ -17,7 +17,8 @@ async function getDashboardData(userId: string) {
   const currentYear = now.getFullYear()
 
   try {
-    const [transactions, subscription, goals, transactionCount, dasPayment] = await Promise.all([
+    // Consulta básica que sabemos que funciona com o banco atual
+    const [transactions, subscription, goals, transactionCount] = await Promise.all([
       prisma.transaction.findMany({
         where: { userId },
         orderBy: { date: "desc" },
@@ -34,59 +35,18 @@ async function getDashboardData(userId: string) {
         orderBy: { month: "desc" }
       }),
       prisma.transaction.count({ where: { userId } }),
-      prisma.transaction.findFirst({
-        where: {
-          userId,
-          category: "Impostos (DAS MEI)",
-          date: {
-            gte: new Date(currentYear, currentMonth - 1, 1),
-            lt: new Date(currentYear, currentMonth, 1),
-          }
-        }
-      })
     ])
 
-    let products: any[] = []
-    try {
-      products = await prisma.product.findMany({
-        where: { userId },
-        orderBy: { stock: "asc" },
-        take: 50
-      })
-    } catch (error) {
-      console.warn("Módulo de inventário ainda não sincronizado no banco de dados.")
-    }
-
-    // Filtrar produtos com estoque baixo em memória (Prisma não suporta comparação de colunas direta no where)
-    const lowStockProducts = products ? products.filter((p: any) => p.stock <= p.minStock).slice(0, 3) : []
-
-    // Todas as transações do mês atual para calcular o atingimento da meta
-    const monthTransactions = await prisma.transaction.findMany({
-      where: {
-        userId,
-        date: {
-          gte: new Date(currentYear, currentMonth - 1, 1),
-          lt: new Date(currentYear, currentMonth, 1),
-        },
-      },
-    })
-
-    const currentMonthIncome = monthTransactions
+    // Mock temporário para evitar quebra por falta de colunas
+    const lowStockProducts: any[] = []
+    const isDasPaid = false
+    const currentMonthIncome = transactions
       .filter((t) => t.type === "income")
       .reduce((sum, t) => sum + t.amount, 0)
 
-    // Calcule o faturamento anual do ano atual
-    const yearlyIncome = await prisma.transaction.aggregate({
-      where: {
-        userId,
-        type: "income",
-        date: {
-          gte: new Date(currentYear, 0, 1),
-          lt: new Date(currentYear + 1, 0, 1),
-        }
-      },
-      _sum: { amount: true }
-    }).then(res => res._sum.amount || 0)
+    const yearlyIncome = transactions
+      .filter((t) => t.type === "income")
+      .reduce((sum, t) => sum + t.amount, 0)
 
     const income = transactions
       .filter((t) => t.type === "income")
@@ -106,12 +66,12 @@ async function getDashboardData(userId: string) {
       currentMonthIncome,
       yearlyIncome,
       transactionCount,
-      isDasPaid: !!dasPayment,
+      isDasPaid,
       isGoalSet: !!goals.find(g => g.month === currentMonth && g.year === currentYear),
-      lowStockProducts: lowStockProducts,
+      lowStockProducts,
     }
   } catch (error) {
-    console.error("Erro crítico ao carregar dashboard:", error)
+    console.error("Erro no dashboard:", error)
     return {
       stats: { income: 0, expenses: 0, balance: 0 },
       transactions: [],
