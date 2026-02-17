@@ -16,7 +16,7 @@ async function getDashboardData(userId: string) {
   const currentMonth = now.getMonth() + 1
   const currentYear = now.getFullYear()
 
-  const [transactions, subscription, goals, transactionCount, dasPayment] = await Promise.all([
+  const [transactions, subscription, goals, transactionCount, dasPayment, products] = await Promise.all([
     prisma.transaction.findMany({
       where: { userId },
       orderBy: { date: "desc" },
