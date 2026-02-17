@@ -8,24 +8,33 @@ import { TransactionList } from "@/components/transactions/transaction-list"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 async function getTransactions(userId: string) {
-  const [transactions, count, subscription] = await Promise.all([
-    prisma.transaction.findMany({
-      where: { userId },
-      orderBy: { date: "desc" },
-      include: {
-        product: {
-          select: {
-            name: true,
-            unit: true
+  try {
+    const [transactions, count, subscription] = await Promise.all([
+      prisma.transaction.findMany({
+        where: { userId },
+        orderBy: { date: "desc" },
+        include: {
+          product: {
+            select: {
+              name: true,
+              unit: true
+            }
           }
         }
-      }
-    }),
-    prisma.transaction.count({ where: { userId } }),
-    prisma.subscription.findUnique({ where: { userId } }),
-  ])
+      }),
+      prisma.transaction.count({ where: { userId } }),
+      prisma.subscription.findUnique({ where: { userId } }),
+    ])
 
-  return { transactions, count, subscription }
+    return { transactions, count, subscription }
+  } catch (error) {
+    console.error("Erro ao buscar transações:", error)
+    return {
+      transactions: [],
+      count: 0,
+      subscription: null
+    }
+  }
 }
 
 export default async function TransacoesPage() {

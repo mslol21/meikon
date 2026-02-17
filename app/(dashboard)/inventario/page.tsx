@@ -15,17 +15,22 @@ export default async function InventoryPage() {
     redirect("/login")
   }
 
-  const products = await prisma.product.findMany({
-    where: {
-      userId: session.user.id,
-    },
-    include: {
-      category: true,
-    },
-    orderBy: {
-      name: "asc",
-    },
-  })
+  let products: any[] = []
+  try {
+    products = await prisma.product.findMany({
+      where: {
+        userId: session.user.id,
+      },
+      include: {
+        category: true,
+      },
+      orderBy: {
+        name: "asc",
+      },
+    })
+  } catch (error) {
+    console.warn("Módulo de inventário ainda não disponível no banco de dados.")
+  }
 
   // Basic stats
   const totalProducts = products.length

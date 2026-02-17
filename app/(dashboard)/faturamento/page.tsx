@@ -7,22 +7,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { FileText, Link as LinkIcon, History } from "lucide-react"
 
 async function getInvoicingData(userId: string) {
-  const [contacts, transactions] = await Promise.all([
-    prisma.contact.findMany({
-      where: { userId },
-      orderBy: { name: "asc" }
-    }),
-    prisma.transaction.findMany({
-      where: { 
-        userId,
-        type: "income" 
-      },
-      orderBy: { date: "desc" },
-      take: 5
-    })
-  ])
-  
-  return { contacts, recentIncomes: transactions }
+  try {
+    const [contacts, transactions] = await Promise.all([
+      prisma.contact.findMany({
+        where: { userId },
+        orderBy: { name: "asc" }
+      }),
+      prisma.transaction.findMany({
+        where: { 
+          userId,
+          type: "income" 
+        },
+        orderBy: { date: "desc" },
+        take: 5
+      })
+    ])
+    
+    return { contacts, recentIncomes: transactions }
+  } catch (error) {
+    console.error("Erro ao buscar dados de faturamento:", error)
+    return { contacts: [], recentIncomes: [] }
+  }
 }
 
 export default async function FaturamentoPage() {

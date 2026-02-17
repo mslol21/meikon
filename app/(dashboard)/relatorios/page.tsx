@@ -17,10 +17,15 @@ import {
 import { Label } from "@/components/ui/label"
 
 async function getTransactions(userId: string) {
-  return await prisma.transaction.findMany({
-    where: { userId },
-    orderBy: { date: "desc" },
-  })
+  try {
+    return await prisma.transaction.findMany({
+      where: { userId },
+      orderBy: { date: "desc" },
+    })
+  } catch (error) {
+    console.error("Erro ao buscar transações para relatórios:", error)
+    return []
+  }
 }
 
 export default async function RelatoriosPage() {
