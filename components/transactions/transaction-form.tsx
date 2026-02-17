@@ -264,7 +264,7 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
               <div className="grid gap-4 p-4 rounded-lg bg-primary/5 border border-primary/20">
                 <div className="grid gap-2">
                   <Label htmlFor="productId">Produto do Inventário</Label>
-                  <Select name="productId" defaultValue={transaction?.productId}>
+                  <Select name="productId" defaultValue={transaction?.productId || undefined}>
                     <SelectTrigger className="bg-background">
                       <SelectValue placeholder="Selecione o produto para dar baixa" />
                     </SelectTrigger>
